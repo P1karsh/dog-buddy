@@ -27,7 +27,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["shared/settings.js", "shared/dogs.js", "content/dog.js"],
+      "js": ["shared/settings.js", "shared/sprite-meta.js", "shared/sprites.js", "content/dog.js"],
       "run_at": "document_idle"
     }
   ]

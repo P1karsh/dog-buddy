@@ -1,10 +1,12 @@
 /* Dog Buddy: background service worker.
    - Opens the side panel when you click the toolbar icon.
+   - Hands sprite sheets to pages (so the dog never depends on a site's security rules).
    - Closes a short-form tab after the dog boops it, and counts boops per day.
    - Auto-sleep: tells every tab you're away when Chrome reports you idle. */
 importScripts('shared/settings.js');
 const S = globalThis.DogSettings;
-const CONTENT_FILES = ['shared/settings.js', 'shared/dogs.js', 'content/dog.js'];
+const CONTENT_FILES = ['shared/settings.js', 'shared/sprite-meta.js', 'shared/sprites.js', 'content/dog.js'];
+const SPRITE_IDS = new Set(['golden', 'bernese', 'lab-yellow', 'lab-black', 'lab-chocolate', 'fx']);
 
 // ---- Toolbar icon opens the side panel (or a popup where side panels don't exist)
 async function setupActionClick() {
@@ -64,7 +66,28 @@ async function closeBoopedTab(tab) {
   await chrome.tabs.remove(tab.id);
 }
 
+// ---- Sprite sheets ------------------------------------------------------------------
+const spriteCache = new Map();
+async function spriteBase64(id) {
+  if (!spriteCache.has(id)) {
+    spriteCache.set(id, (async () => {
+      const buf = new Uint8Array(await (await fetch(chrome.runtime.getURL(`sprites/${id}.png`))).arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      return btoa(bin);
+    })());
+  }
+  return spriteCache.get(id);
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.type === 'dog:sprite' && SPRITE_IDS.has(msg.id)) {
+    spriteBase64(msg.id).then(
+      (data) => sendResponse({ ok: true, data }),
+      (e) => { spriteCache.delete(msg.id); sendResponse({ ok: false, error: String(e) }); },
+    );
+    return true;
+  }
   if (msg?.type === 'dog:boop-close' && sender.tab?.id != null) {
     closeBoopedTab(sender.tab).then(
       () => sendResponse({ ok: true }),

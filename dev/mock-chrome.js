@@ -41,6 +41,12 @@
     runtime: {
       id: 'dev-playground',
       async sendMessage(msg) {
+        if (msg?.type === 'dog:sprite') {
+          const buf = new Uint8Array(await (await fetch(`/sprites/${msg.id}.png`)).arrayBuffer());
+          let bin = '';
+          for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+          return { ok: true, data: btoa(bin) };
+        }
         if (msg?.type === 'dog:boop-close') {
           const count = (store.boops?.day === today() ? store.boops.count : 0) + 1;
           await local.set({ boops: { day: today(), count } });

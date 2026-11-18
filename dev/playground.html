@@ -28,16 +28,24 @@
   <button id="short" aria-pressed="false">Pretend this is YouTube Shorts</button>
   <button id="away" aria-pressed="false">Step away (auto-sleep)</button>
   <button id="reset">Reset stats</button>
+  <button data-trick="paw">Offer paw</button>
+  <button data-trick="roll">Roll</button>
+  <button data-trick="belly">Belly up</button>
+  <button data-trick="grin">Grin (Lab)</button>
+  <button data-trick="spin">Spin</button>
 </div>
 <div class="closed" id="closed">🐾 Tab closed by the dog! (click to reopen)</div>
 
 <script src="mock-chrome.js"></script>
 <script src="../shared/settings.js"></script>
-<script src="../shared/dogs.js"></script>
+<script src="../shared/sprite-meta.js"></script>
+<script src="../shared/sprites.js"></script>
 <script>
   // Dev only: keep the dog's shadow root inspectable (it's closed in the real extension).
   const realAttach = Element.prototype.attachShadow;
   Element.prototype.attachShadow = function (opts) { return realAttach.call(this, { ...opts, mode: 'open' }); };
+  // Lets the trick buttons below call into the content script.
+  window.__dogDev = {};
   // Let the playground pretend to be a short-form page.
   let fakeShort = false;
   const realMatch = DogSettings.shortFormSite;
@@ -60,6 +68,7 @@
     chrome.storage.local.set({ away: on });
   };
   $('reset').onclick = () => chrome.storage.local.set({ boops: null, scrollTime: null });
+  document.querySelectorAll('[data-trick]').forEach((b) => { b.onclick = () => window.__dogDev.api?.trick(b.dataset.trick); });
   addEventListener('mock:tab-closed', () => {
     fakeShort = false;
     $('short').setAttribute('aria-pressed', 'false');

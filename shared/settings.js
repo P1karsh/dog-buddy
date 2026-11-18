@@ -35,6 +35,17 @@ globalThis.DogSettings = (() => {
     },
   };
 
+  // Easter egg: a yellow Lab is called Bruno by default; every other dog is Biscuit.
+  const DEFAULT_NAMES = ['Biscuit', 'Bruno'];
+  function defaultName(breed, coat) {
+    return breed === 'lab' && (coat || 'yellow') === 'yellow' ? 'Bruno' : 'Biscuit';
+  }
+  // True while the name is still one we picked (so it follows the breed), not one you typed.
+  function isDefaultName(name) {
+    const n = String(name || '').trim().toLowerCase();
+    return !n || DEFAULT_NAMES.some((d) => d.toLowerCase() === n);
+  }
+
   const pad = (n) => String(n).padStart(2, '0');
 
   function todayKey(d = new Date()) {
@@ -122,5 +133,6 @@ globalThis.DogSettings = (() => {
   return {
     DEFAULTS, DEFAULT_POSITION, GRACE_OPTIONS, SLEEP_OPTIONS, SITES, MAX_CUSTOM_SITES,
     todayKey, merge, todayValue, normalizeSite, shortFormSite, load, save, fmtTime,
+    defaultName, isDefaultName,
   };
 })();
