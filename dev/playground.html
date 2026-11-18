@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dog Playground</title>
+<style>
+  body { margin: 0; font: 15px/1.6 Georgia, serif; color: #222; background: #fafafa; display: grid; grid-template-columns: 1fr 360px; min-height: 100vh; }
+  .page { padding: 110px 40px 40px; }
+  .page h1 { font: 700 26px/1.2 system-ui, sans-serif; margin: 0 0 12px; }
+  .devbar { position: fixed; left: 12px; bottom: 12px; display: flex; gap: 6px; flex-wrap: wrap; z-index: 1; font: 13px system-ui, sans-serif; }
+  .devbar button { padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+  .devbar button[aria-pressed="true"] { background: #ffe2bd; border-color: #e08a3c; }
+  iframe { width: 360px; height: 100vh; border: 0; border-left: 1px solid #ddd; position: sticky; top: 0; }
+  .closed { position: fixed; inset: 0 360px 0 0; display: none; place-items: center; background: rgba(255,255,255,.92); font: 700 22px system-ui, sans-serif; z-index: 2; }
+  .closed.show { display: grid; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>A pretend web page</h1>
+  <p>This is a dev-only page that runs the real content script and side panel with a fake <code>chrome</code> API. Drag the dog, click it, and use the buttons at the bottom-left to simulate a Shorts tab or stepping away.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada. Nulla facilisi. Mauris ac sem vel purus pulvinar fermentum.</p>
+  <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla. Maecenas faucibus mollis interdum.</p>
+</div>
+<iframe id="panel" title="Side panel"></iframe>
+<div class="devbar">
+  <button id="short" aria-pressed="false">Pretend this is YouTube Shorts</button>
+  <button id="away" aria-pressed="false">Step away (auto-sleep)</button>
+  <button id="reset">Reset stats</button>
+</div>
+<div class="closed" id="closed">🐾 Tab closed by the dog! (click to reopen)</div>
+
+<script src="mock-chrome.js"></script>
+<script src="../shared/settings.js"></script>
+<script src="../shared/dogs.js"></script>
+<script>
+  // Dev only: keep the dog's shadow root inspectable (it's closed in the real extension).
+  const realAttach = Element.prototype.attachShadow;
+  Element.prototype.attachShadow = function (opts) { return realAttach.call(this, { ...opts, mode: 'open' }); };
+  // Let the playground pretend to be a short-form page.
+  let fakeShort = false;
+  const realMatch = DogSettings.shortFormSite;
+  DogSettings.shortFormSite = (href, s) => (fakeShort && s.sites.youtube ? 'youtube' : realMatch(href, s));
+</script>
+<script src="../content/dog.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  // Load the real side panel, with the mock chrome API slipped in first.
+  fetch('../panel/panel.html').then((r) => r.text()).then((html) => {
+    $('panel').srcdoc = html.replace('<head>', '<head><base href="/panel/"><script src="/dev/mock-chrome.js"><\/script>');
+  });
+  $('short').onclick = () => {
+    fakeShort = !fakeShort;
+    $('short').setAttribute('aria-pressed', String(fakeShort));
+  };
+  $('away').onclick = () => {
+    const on = $('away').getAttribute('aria-pressed') !== 'true';
+    $('away').setAttribute('aria-pressed', String(on));
+    chrome.storage.local.set({ away: on });
+  };
+  $('reset').onclick = () => chrome.storage.local.set({ boops: null, scrollTime: null });
+  addEventListener('mock:tab-closed', () => {
+    fakeShort = false;
+    $('short').setAttribute('aria-pressed', 'false');
+    $('closed').classList.add('show');
+  });
+  $('closed').onclick = () => $('closed').classList.remove('show');
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dog Buddy</title>
+<link rel="stylesheet" href="panel.css">
+</head>
+<body>
+<main class="wrap">
+
+  <section class="hero">
+    <button type="button" class="hero-dog" id="heroDog" title="Pet me!" aria-label="Pet your dog"></button>
+    <div class="hero-text">
+      <h1 id="heroName">Biscuit</h1>
+      <p id="heroStatus">Cheering you on</p>
+    </div>
+    <label class="switch hero-switch" title="Show the dog on pages">
+      <input type="checkbox" id="enabled">
+      <span aria-hidden="true"></span>
+      <em class="sr">Dog on</em>
+    </label>
+  </section>
+
+  <section class="card today" aria-label="Today">
+    <div class="stat">
+      <div class="big" id="boopCount">0</div>
+      <div class="lbl" id="boopLbl">tabs booped today</div>
+    </div>
+    <div class="stat">
+      <div class="big" id="scrollUsed">0:00</div>
+      <div class="lbl" id="scrollLbl">grace used today</div>
+      <div class="meter" id="scrollMeter"><i id="scrollBar"></i></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Your dog</h2>
+    <div class="breeds" id="breeds"></div>
+    <div class="coats" id="coats" hidden></div>
+    <label class="field">
+      <span>Name</span>
+      <input id="name" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Biscuit">
+    </label>
+  </section>
+
+  <section class="card">
+    <h2>What should <span class="dogname">Biscuit</span> do?</h2>
+    <div class="choices">
+      <button type="button" class="choice" data-activity="cheer">
+        <b>Cheer me on</b>
+        <small>Sits on your page, does tricks and cheers you up.</small>
+      </button>
+      <button type="button" class="choice" data-activity="nap">
+        <b>Nap</b>
+        <small>Sleeps cutely on top of your page. Click to wake.</small>
+      </button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h2>No-scroll patrol</h2>
+      <label class="switch">
+        <input type="checkbox" id="patrol">
+        <span aria-hidden="true"></span>
+        <em class="sr">No-scroll patrol</em>
+      </label>
+    </div>
+    <div id="patrolBody">
+      <p class="hint"><span class="dogname">Biscuit</span> wobbles over and boops these tabs closed:</p>
+      <div class="chips" id="sites"></div>
+      <div class="custom">
+        <span class="field-label">Your own sites</span>
+        <ul class="site-list" id="customList"></ul>
+        <form class="add-site" id="addSite" autocomplete="off">
+          <input id="newSite" type="text" spellcheck="false" placeholder="e.g. reddit.com or facebook.com/reel" aria-label="Website to add">
+          <button type="submit">Add</button>
+        </form>
+        <p class="error" id="siteError" role="alert" hidden></p>
+      </div>
+      <label class="field">
+        <span>Grace time</span>
+        <select id="grace"></select>
+      </label>
+      <p class="hint">Free scrolling per day before <span class="dogname">Biscuit</span> steps in. Resets at midnight.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h2>Auto-sleep</h2>
+      <label class="switch">
+        <input type="checkbox" id="autoSleep">
+        <span aria-hidden="true"></span>
+        <em class="sr">Auto-sleep</em>
+      </label>
+    </div>
+    <div id="sleepBody">
+      <p class="hint">Curls up for a nap when you step away from your computer, and wakes up happy when you're back.</p>
+      <label class="field">
+        <span>Fall asleep after</span>
+        <select id="sleepAfter"></select>
+      </label>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Drag <span class="dogname">Biscuit</span> anywhere on a page. Click to pet.</p>
+    <button type="button" class="ghost" id="resetPos">Reset position</button>
+  </footer>
+
+</main>
+<script src="../shared/settings.js"></script>
+<script src="../shared/dogs.js"></script>
+<script src="panel.js"></script>
+</body>
+</html>
